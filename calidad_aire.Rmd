@@ -1,0 +1,43 @@
+---
+title: "Calidad_aire"
+author: "Nuria Pesudo"
+date: "2025-06-06"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+library(dplyr)
+library(hms)
+
+
+datos <- read.csv("mapa.csv", stringsAsFactors = FALSE)
+
+
+cols <- c("NO2", "PM25", "PM10", "CO2", "O3")
+datos[cols] <- lapply(datos[cols], function(x) as.numeric(gsub(",", ".", x)))
+
+
+datos$hora <- hms::as_hms(datos$hora)
+
+datos$franja <- case_when(
+  datos$hora >= hms::as_hms("06:30:00") & datos$hora <= hms::as_hms("07:30:00") ~ "Mañana",
+  datos$hora >= hms::as_hms("21:00:00") & datos$hora <= hms::as_hms("22:00:00") ~ "Noche",
+  TRUE ~ NA_character_
+)
+
+```
+
+
+```{r}
+datos$tipo_dia <- ifelse(datos$fecha == "25/05/25", "Fin de semana", "Laborable")
+
+
+```
+
+```{r}
+write.csv(datos, "mapa_franjas.csv", row.names = FALSE)
+
+```
+
